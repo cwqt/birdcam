@@ -8,5 +8,6 @@ just C
 TypeScript & Express 
 Manipulates images adding timestamp 
 
-* __GET__: `/:i` where 1 < `i` 10 - 10 being oldest image
+* __GET__: `/current` Timestamped snapshot
+* __GET__: `/stream` Proxy stream
 * __GET__: `/ping` Pong!
