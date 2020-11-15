@@ -47,6 +47,11 @@ static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %
 
 httpd_handle_t stream_httpd = NULL;
 
+static esp_err_t index_handler(httpd_req_t *req){
+
+}
+
+
 static esp_err_t stream_handler(httpd_req_t *req){
   camera_fb_t * fb = NULL;
   esp_err_t res = ESP_OK;
@@ -55,11 +60,9 @@ static esp_err_t stream_handler(httpd_req_t *req){
   char * part_buf[64];
 
   res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
-  if(res != ESP_OK){
-    return res;
-  }
+  if(res != ESP_OK) { return res; }
 
-  while(true){
+  // while(true){
     fb = esp_camera_fb_get();
     if (!fb) {
       Serial.println("Camera capture failed");
@@ -102,7 +105,7 @@ static esp_err_t stream_handler(httpd_req_t *req){
       break;
     }
     //Serial.printf("MJPG: %uB\n",(uint32_t)(_jpg_buf_len));
-  }
+  // }
   return res;
 }
 
@@ -110,16 +113,24 @@ void startCameraServer(){
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
   config.server_port = 80;
 
-  httpd_uri_t index_uri = {
-    .uri       = "/",
+  // httpd_uri_t index_uri = {
+  //   .uri       = "/",
+  //   .method    = HTTP_POST,
+  //   .handler   = single_handler,
+  //   .user_ctx  = NULL
+  // };
+
+  httpd_uri_t stream_uri = {
+    .uri       = "/stream",
     .method    = HTTP_GET,
     .handler   = stream_handler,
     .user_ctx  = NULL
   };
   
-  //Serial.printf("Starting web server on port: '%d'\n", config.server_port);
+  Serial.printf("Starting web server on port: '%d'\n", config.server_port);
   if (httpd_start(&stream_httpd, &config) == ESP_OK) {
-    httpd_register_uri_handler(stream_httpd, &index_uri);
+    httpd_register_uri_handler(stream_httpd, &stream_uri);
+    // httpd_register_uri_handler(stream_httpd, &index_uri);
   }
 }
 
@@ -151,15 +162,15 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG; 
   
-  if(psramFound()){
-    config.frame_size = FRAMESIZE_UXGA;
-    config.jpeg_quality = 10;
-    config.fb_count = 2;
-  } else {
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
-    config.fb_count = 1;
-  }
+  // if(psramFound()){
+  //   config.frame_size = FRAMESIZE_UXGA;
+  //   config.jpeg_quality = 10;
+  //   config.fb_count = 2;
+  // } else {
+  config.frame_size = FRAMESIZE_SVGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 1;
+  // }
   
   // Camera init
   esp_err_t err = esp_camera_init(&config);
